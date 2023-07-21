@@ -1,0 +1,161 @@
+---
+title: "Ejemplo de un Modelo de Regresión Lineal Simple"
+author: 
+- Rafael E. Borges, borgesr@gmail.com, Profesor Titular, Escuela de Estadística, ULA, Mérida, Venezuela.
+date: ""
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+# Introducción
+
+El Modelo de Regresión Lineal Simple (MRLS) es el modelo estadístico más sencillo de los modelos estadísticos, y se usa para explicar la variabilidad de una variable respuesta cuantitativa (usualmente continua), denotada por y usando una variable explicativa (cuantitativa, o en algunos casos dicotómica o dummy), denotada por x, donde la relación entre las variables se da a través de una línea recta.
+
+En este ejemplo, no se profundizará en aspectos teóricos, ya que estos están muy bién presentados en algunos textos, como por ejemplo el de Kleinbaum, Kupper, Nizam y Rosenberg (2014) o el de Montgomery, Peck y Vining (2012), si lo que se quiere obtener una introducción, se recomienda consultar el excelente libro de Urdan (2022), y si se quiere revisar un libro donde se quiere ver aspectos de modelos de regresión usando R, se recomienda consultar el libro de Faraway (2015).
+
+# Pasos para llevar a cabo un Análisis de un Modelo de Regresión Simple:
+
+Un proceso de modelamiento estadístico incluye una serie de pasos, los cuales pueden llevarse a cabo a través de los siguientes pasos:
+
+1. Exploración de la relación funcional entre la variable y y la variable x, que para el MRLS se hace a través del gráfico de dispersión, en el cual la nube de puntos debería sugerir una forma cercana a una linea recta.
+
+2. Formulación del Modelo, que consiste en la identificación del modelo y cada una de sus componentes, y el establecimiento de los supuestos del modelo.
+
+3. Ajuste del modelo, que consiste en la estimación de los parámetros del modelo.
+
+4. Verificación de la significación del modelo, que se hace utilizando la tabla de Análisis de Varianza, que es construida a partir de la descomposición de la suma de cuadrados totales en dos fuentes de de variabilidad, la del modelo y la del error.
+
+5. Inferencia acerca de los parámetros.
+
+6. Verificación de los supuestos del modelo, efectuada a través de métodos gráficos conocidos como Análisis de Residuos.
+
+7. Corrección de los supuestos violados en el modelo (solo cuando es requerida).
+
+8. Interpretación.
+
+# Ejemplo:
+
+Consideremos los siguientes datos:
+
+```{r}
+Ind <- c(1:8)
+Estat <- c(174, 160, 155, 175, 160, 180, 165, 175)
+Pesos <- c(78, 49, 56, 75, 54, 92, 70, 80)
+
+Tabla <- as.data.frame(cbind(Ind, Estat, Pesos))
+```
+
+La siguiente tabla muestra el peso (en Kgs.) y la estatura de un grupo de 8 personas:
+
+```{r, include=FALSE}
+library(xtable)
+print(xtable(Tabla,align=c("c","c","c","c")), type = "html")
+```
+
+<table border=1>
+<tr> <th> Individuo </th> <th> Estatura (cms.)  </th> <th> Peso (kgs.) </th> </th>
+  <tr> <td align="center"> 1 </td> <td align="center"> 174 </td> <td align="center"> 78  </td> </tr>
+  <tr> <td align="center"> 2 </td> <td align="center"> 160 </td> <td align="center"> 49  </td> </tr>
+  <tr> <td align="center"> 3 </td> <td align="center"> 155 </td> <td align="center"> 56  </td> </tr>
+  <tr> <td align="center"> 4 </td> <td align="center"> 175 </td> <td align="center"> 75  </td> </tr>
+  <tr> <td align="center"> 5 </td> <td align="center"> 160 </td> <td align="center"> 54  </td> </tr>
+  <tr> <td align="center"> 6 </td> <td align="center"> 180 </td> <td align="center"> 92  </td> </tr>
+  <tr> <td align="center"> 7 </td> <td align="center"> 165 </td> <td align="center"> 70  </td> </tr>
+  <tr> <td align="center"> 8 </td> <td align="center"> 175 </td> <td align="center"> 80  </td> </tr>
+  </table>
+     
+# Gráfico de dispersión de Y vs. X;
+
+Antes de ajustar el modelo, debemos explorar la relación entre la variable independiente(X)y la variable dependdiente, lo cual, para el MRLS, se hace a través del gráfico de dispersión.
+
+```{r}
+plot(Estat, Pesos, main = "Gráfico de dispersión de Pesos Vs. Estatura")
+```
+
+Y en este gráfico se puede visualizar que la relación entre el peso y estatura pudiera representarse mendiante una línea recta, y esto justifica el uso de un MRLS.
+
+# Ajuste del modelo:
+
+Mediante la función _lm_ podemos obtener el ajuste de un modelo lineal, que en el caso de un un modelo de regresión lineal simple, consiste en la estimación de el intercepto poblacional de la recta de regresión (Beta0), y la pendiente poblacional de la recta de regresión (Beta1).
+
+En este caso le asignamos el nombre de mrls.
+
+```{r}
+mrls <- lm(Pesos ~ Estat)
+```
+
+# Representación de la línea recta en el gráfico de dispersión:
+
+
+```{r}
+plot(Estat, Pesos, main = "Gráfico de dispersión de Pesos Vs. Estatura")
+abline(mrls$coefficients[1], mrls$coefficients[2])
+```
+
+# Verifificación de la significación del modelo:
+
+Se hace a través de la tabla de Análisis de Varianza (ANOVA o ANAVA), que se genera usando la función anova:
+
+```{r}
+anova(mrls)
+```
+
+Y tomamos la decisión:
+
+Como 0,0005896 < 0,05 (nivel de significación prefijado), rechazamos la hipótesis nula (no signficación del modelo), es decir que existe evidencia de que el modelo es significatico, lo cual significa que el Peso puede ser explicado a través de la Estatura, usando una línes recta.
+
+# Significación de los coeficientes:
+
+Se hace usando la función summary:
+
+```{r}
+summary(mrls)
+```
+
+De donde se puede concluir que:
+
+1. Como 0,00298 < 0,05, el intercepto de la recta de regresión es significativo.
+
+2. Como 0,00059 < 0,05, la pendiente de la recta de regresión es significativa (en un MRLS coincide con la significación del modelo).
+
+Adicionalmente se puede tomar decisión del porcentaje de variabilidad de la variable respuesta mediante el MRLS, y para ello utilizamos el R cuadrado. En este caso, el R cuadrado ajustado es 0,8581, que puede ser considerado como alto, e indica que el 85,8% de la variabilidad del Peso de una persona puede ser explicado a través de la Estatura, usando una línea recta.
+
+# Análisis de residuos:
+
+```{r}
+par(mfrow = c(2,2))
+plot(mrls)
+```
+
+Y para el MRLS, interpretamos los primeros dos gráficos:
+
+En el primero se puede observar que la varianza de los Pesos para los distintos valores de Estatura pareciera no diferir. (Lo ideal es observar un patrón de una nube de puntos).
+
+En el segundo de los gráficos, observamos que no pareciara violarse el supuesto de normalidad de los residuos.
+
+Y debido a que no se violan los supuesto básicos del MRLS, puedo proceder al la interpretación de las estimaciones del MRLS.
+
+# Interpretación del MRLS:
+
+Usualmente, el intercepto no se interpreta, porque correspondería a al Peso cuando una persona mide 0 cms, y se considera que esta es un valor para obtener una mejor mejor representación de la línea recta. (Solo se interpreta cuando el valor de X = 0, tiene sentido).
+
+El coeficiente estimado de la pendiente de la recta de regresión, nos indica que al aumentar la Estatura en 1 cm., el Peso aumenta en 1,533 kgs.
+
+# Referencias 
+
+Faraway, J.J. (2015). _Linear Models with R_. Segunda edición. Boca Ratón, FL: CRC Press (Taylor & Francis Group). 
+
+Kleinbaum, D.G., Kupper,L.L., Nizam, A. y Rosenberg, E.S. (2014). _Applied Regression Analysis and Other Multivariable Methods_. Quinta edición. Boston, MA: Cengage Learning.
+
+Montgomery, D.C., Peck, E.A. y Vining, G.G. (2012). _Introduction to linear regression analysis_. Quinta edición.N.Y.: Wiley.
+
+Urdan, T.G. (2022). _Statistics in Plain English_. Quinta edición.N.Y.: Routledge (Taylor & Francis Group). 
